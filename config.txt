@@ -1,0 +1,240 @@
+Building configuration...
+
+Current configuration : 12245 bytes
+!
+version 15.1
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service internal
+!
+hostname HomeRTR
+!
+!
+!
+logging buffered 4096
+!
+aaa new-model
+!
+!
+!
+ip dhcp excluded-address 192.168.0.1 192.168.0.48
+ip dhcp excluded-address 192.168.0.109 192.168.0.254
+!
+ip dhcp pool PULA
+ network 192.168.0.0 255.255.255.0
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-Printer
+ host 192.168.0.130 255.255.255.0
+ client-identifier 013c.4a92.c0d1.7e
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-Kathrein
+ host 192.168.0.121 255.255.255.0
+ client-identifier 0100.d055.0e53.8b
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-ESXi
+ host 192.168.0.115 255.255.255.0
+ client-identifier 01bc.5ff4.1c41.7b
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-CVO
+ host 192.168.0.116 255.255.255.0
+ client-identifier 01ec.c882.bb26.e8
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-ESXi-InsERT
+ host 192.168.0.147 255.255.255.0
+ client-identifier 0100.0c29.50a8.0a
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-ESXi-nbmonia
+ host 192.168.0.141 255.255.255.0
+ client-identifier 0100.0c29.c66f.43
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-Nas2
+ host 192.168.0.112 255.255.255.0
+ client-identifier 0154.75d0.d5a8.4e
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool STATIC-Nbox
+ host 192.168.0.122 255.255.255.0
+ client-identifier 0100.0391.8501.01
+ default-router 192.168.0.1 
+ dns-server 193.34.178.1 8.8.8.8 
+!
+ip dhcp pool TEST
+ host 192.168.0.200 255.255.255.0
+ client-identifier 0100.0000.0000.01
+ default-router 192.168.0.1 
+ dns-server 192.34.178.1 
+!
+ip dhcp pool STATIC-Test1
+ host 192.168.0.201 255.255.255.0
+ client-identifier 0100.0000.0000.02
+ default-router 192.168.0.1 
+ dns-server 192.34.178.1 
+!
+!
+ip cef
+!
+ip ips signature-category
+  category all
+   retired true
+  category reconnaissance
+   retired true
+  category ios_ips basic
+   retired false
+!
+!
+multilink bundle-name authenticated
+vpdn enable
+!
+!
+!
+!
+!
+ip ssh time-out 60
+ip ssh authentication-retries 4
+!
+class-map match-any GOLD
+ match access-group name ACL_GOLD
+ match  dscp af11 
+class-map match-any PLATINUM
+ match access-group name ACL_PLATINUM
+ match  dscp ef 
+class-map match-any SCAVENGER
+ match protocol bittorrent
+ match access-group name ACL_SCAVENGER
+ match  dscp af12 
+!
+!
+policy-map QoS_OUTGOING
+ class PLATINUM
+  priority 2048
+ class GOLD
+  bandwidth 2048
+  fair-queue
+ class SCAVENGER
+  police cir 128000
+   conform-action transmit 
+   exceed-action drop 
+ class class-default
+  fair-queue
+policy-map IN_MARK
+ class PLATINUM
+  set dscp ef
+ class GOLD
+  set dscp af11
+ class SCAVENGER
+  set dscp af12
+!
+! 
+!
+interface Loopback0
+ ip address 10.1.1.1 255.255.255.0
+!
+interface BRI0
+ no ip address
+ encapsulation hdlc
+ shutdown
+ isdn termination multidrop
+!
+interface FastEthernet0
+ description --- NAS2 ---
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet1
+ description --- ESX ---
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet2
+ description --- CVO ---
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet3
+ description --- Printer ---
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet4
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet5
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet6
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet7
+ description --- PARTER ---
+ switchport access vlan 10
+ no ip address
+ spanning-tree portfast
+!
+interface FastEthernet8
+ no ip address
+ shutdown
+ duplex auto
+ speed auto
+!
+!
+interface wlan-ap0
+ description Service module interface to manage the embedded AP
+ ip unnumbered Loopback0
+ arp timeout 0
+!
+interface Wlan-GigabitEthernet0
+ description Internal switch interface connecting to the embedded AP
+ switchport trunk native vlan 10
+ switchport mode trunk
+ no ip address
+!
+interface Vlan1
+ no ip address
+!
+interface Vlan10
+ no ip address
+ bridge-group 10
+ bridge-group 10 spanning-disabled
+!
+!
+!
+line con 0
+line 2
+ no activation-character
+ no exec
+ transport preferred none
+ transport input all
+ transport output pad telnet rlogin udptn ssh
+line aux 0
+line vty 0 4
+ access-class 10 in
+ privilege level 15
+ transport input telnet ssh
+!
+end
