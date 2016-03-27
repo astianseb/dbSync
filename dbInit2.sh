@@ -13,13 +13,12 @@ sqlite3 rtrconfig.db "CREATE TABLE ip_to_mac(
 for j in {1..2}; do
   if [ $j -eq 1 ]; then
     kom_type="KOM-A"
-    for i in {5..230}; do
-      sqlite3 rtrconfig.db "INSERT INTO ip_to_mac (kom_type, ip_address, istaken) VALUES (\"$kom_type\",\"192.168.0.$i\", \"N\")"
-    done
+    octet="0"
  else
     kom_type="KOM-B"
-    for i in {5..230}; do
-      sqlite3 rtrconfig.db "INSERT INTO ip_to_mac (kom_type, ip_address, istaken) VALUES (\"$kom_type\",\"192.168.5.$i\",\"N\")"
-    done
+    octet="5"
  fi
+ for i in {5..230}; do
+      sqlite3 rtrconfig.db "INSERT INTO ip_to_mac (kom_type, ip_address, istaken) VALUES (\"$kom_type\",\"192.168.$octet.$i\",\"N\")"
+    done
 done
